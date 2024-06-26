@@ -1,9 +1,5 @@
-import { Container, Title } from "./styles";
+import { Container } from "./styles";
 
 export const Groups = () => {
-  return (
-    <Container>
-      <Title>Hello Groups!</Title>
-    </Container>
-  );
+  return <Container></Container>;
 };
