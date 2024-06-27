@@ -1,12 +1,18 @@
+import { useState } from "react";
+import { FlatList } from "react-native";
+
 import { ButtonIcon } from "@/components/ButtonIcon";
+import { Filter } from "@/components/Filter";
 import { Header } from "@/components/Header";
 import { Highlight } from "@/components/Highlight";
 import { Input } from "@/components/Input";
 
-import { Container, Form } from "./styles";
-import { Filter } from "@/components/Filter";
+import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
 
 export const Players = () => {
+  const [team, setTeam] = useState("Time A");
+  const [players, setPlayers] = useState([]);
+
   return (
     <Container>
       <Header showBackButton />
@@ -25,7 +31,22 @@ export const Players = () => {
         <ButtonIcon icon="home" />
       </Form>
 
-      <Filter title="Time A" />
+      <HeaderList>
+        <FlatList
+          data={["Time A", "Time B"]}
+          keyExtractor={(item) => item}
+          horizontal
+          renderItem={({ item }) => (
+            <Filter
+              title={item}
+              isActive={item === team}
+              onPress={() => setTeam(item)}
+            />
+          )}
+        />
+
+        <NumbersOfPlayers>{players.length}</NumbersOfPlayers>
+      </HeaderList>
     </Container>
   );
 };
