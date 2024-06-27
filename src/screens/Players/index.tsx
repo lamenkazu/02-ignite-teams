@@ -9,10 +9,21 @@ import { Input } from "@/components/Input";
 
 import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
 import { PlayerCard } from "@/components/PlayerCard";
+import { EmptyList } from "@/components/EmptyList";
+import { Button } from "@/components/Button";
 
 export const Players = () => {
   const [team, setTeam] = useState("Time A");
-  const [players, setPlayers] = useState(["Erick", "Tata", "Enzo"]);
+  const [players, setPlayers] = useState([
+    "Erick",
+    "Tata",
+    "Enzo",
+    "Bart",
+    "Marge",
+    "Homer",
+    "Moe",
+    "Flanders",
+  ]);
 
   return (
     <Container>
@@ -52,10 +63,20 @@ export const Players = () => {
       <FlatList
         data={players}
         keyExtractor={(item) => item}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <PlayerCard name={item} onRemove={() => {}} />
         )}
+        ListEmptyComponent={() => (
+          <EmptyList message="Não há pessoas nesse time." />
+        )}
+        contentContainerStyle={[
+          { paddingBottom: 100 },
+          players.length === 0 && { flex: 1 }, // Centraliza na tela caso players esteja vazio
+        ]}
       />
+
+      <Button title="Remover Turma" variant="secondary" />
     </Container>
   );
 };
