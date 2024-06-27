@@ -8,10 +8,11 @@ import { Highlight } from "@/components/Highlight";
 import { Input } from "@/components/Input";
 
 import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
+import { PlayerCard } from "@/components/PlayerCard";
 
 export const Players = () => {
   const [team, setTeam] = useState("Time A");
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState(["Erick", "Tata", "Enzo"]);
 
   return (
     <Container>
@@ -47,6 +48,14 @@ export const Players = () => {
 
         <NumbersOfPlayers>{players.length}</NumbersOfPlayers>
       </HeaderList>
+
+      <FlatList
+        data={players}
+        keyExtractor={(item) => item}
+        renderItem={({ item }) => (
+          <PlayerCard name={item} onRemove={() => {}} />
+        )}
+      />
     </Container>
   );
 };
