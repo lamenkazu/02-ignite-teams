@@ -1,6 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 
+import { createGroup } from "@/storage/group/createGroup";
+
 import { Container, Content, Icon } from "./styles";
 
 import { Button } from "@/components/Button";
@@ -13,9 +15,14 @@ export const NewGroup = () => {
 
   const { navigate } = useNavigation();
 
-  const handleGroupCreation = () => {
-    navigate("players", { group });
-    setGroup("");
+  const handleGroupCreation = async () => {
+    try {
+      await createGroup(group);
+      navigate("players", { group });
+      setGroup("");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
