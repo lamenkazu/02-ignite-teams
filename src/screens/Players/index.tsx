@@ -86,6 +86,8 @@ export const Players = () => {
           value={newPlayerName}
           autoCorrect={false} // remove o auto correct do teclado
           onChangeText={setNewPlayerName}
+          onSubmitEditing={handleAddNewPlayer} // qual função deve ser executada quando clicar no enter do teclado
+          returnKeyType="done" // O ícone do botão de enter do teclado
         />
 
         <ButtonIcon icon="add" onPress={handleAddNewPlayer} />
