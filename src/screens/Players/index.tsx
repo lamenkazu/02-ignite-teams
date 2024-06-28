@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, FlatList } from "react-native";
 
 import { ButtonIcon } from "@/components/ButtonIcon";
@@ -15,6 +15,8 @@ import { useRoute } from "@react-navigation/native";
 import { AppError } from "@/utils/AppError";
 import { addPlayerByGroup } from "@/storage/player/addPlayerByGroup";
 import { fetchPlayersByGroup } from "@/storage/player/fetchPlayersByGroup";
+import { fetchTeamPlayersByGroup } from "@/storage/player/fetchTeamPlayersByGroup";
+import { PlayerStorageDTO } from "@/storage/player/PlayerStorageDTO";
 
 interface RouteParams {
   group: string;
@@ -23,7 +25,7 @@ interface RouteParams {
 export const Players = () => {
   const [newPlayerName, setNewPlayerName] = useState("");
   const [team, setTeam] = useState("Time A");
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState<PlayerStorageDTO[]>([]);
 
   const route = useRoute();
   const { group } = route.params as RouteParams;
@@ -43,8 +45,6 @@ export const Players = () => {
 
     try {
       await addPlayerByGroup(newPlayer, group);
-      const players = await fetchPlayersByGroup(group);
-      console.log(players);
     } catch (error) {
       if (error instanceof AppError) {
         return Alert.alert("Nova Pessoa", error.message);
@@ -53,6 +53,20 @@ export const Players = () => {
       Alert.alert("Nova Pessoa", "Não foi possível adicionar.");
     }
   };
+
+  const fetchTeamPlayers = async () => {
+    try {
+      const teamPlayers = await fetchTeamPlayersByGroup(group, team);
+      setPlayers(teamPlayers);
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Não foi possível carregar as pessoas do time.");
+    }
+  };
+
+  useEffect(() => {
+    fetchTeamPlayers();
+  }, [team, players]);
 
   return (
     <Container>
@@ -89,10 +103,10 @@ export const Players = () => {
 
       <FlatList
         data={players}
-        keyExtractor={(item) => item}
+        keyExtractor={(item) => item.name}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <PlayerCard name={item} onRemove={() => {}} />
+          <PlayerCard name={item.name} onRemove={() => {}} />
         )}
         ListEmptyComponent={() => (
           <EmptyList message="Não há pessoas nesse time." />
