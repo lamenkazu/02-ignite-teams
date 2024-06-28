@@ -11,8 +11,10 @@ import { Highlight } from "@/components/Highlight";
 import { GroupCard } from "@/components/GroupCard";
 import { EmptyList } from "@/components/EmptyList";
 import { Button } from "@/components/Button";
+import { Loading } from "@/components/Loading";
 
 export const Groups = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [groups, setGroups] = useState<string[]>([]);
 
   const { navigate } = useNavigation();
@@ -29,11 +31,14 @@ export const Groups = () => {
     useCallback(() => {
       const getAllGroups = async () => {
         try {
+          setIsLoading(true);
           const data = await fetchGroups();
 
           setGroups(data);
         } catch (error) {
           console.log(error);
+        } finally {
+          setIsLoading(false);
         }
       };
 
@@ -46,17 +51,21 @@ export const Groups = () => {
       <Header />
       <Highlight title="Turmas" subtitle="jogue com a sua turma" />
 
-      <FlatList
-        data={groups}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <GroupCard title={item} onPress={() => handleOpenGroup(item)} />
-        )}
-        ListEmptyComponent={() => (
-          <EmptyList message="Que tal cadastrar a primeira turma?" />
-        )}
-        contentContainerStyle={groups.length === 0 && { flex: 1 }} // Centraliza na tela caso groups esteja vazio
-      />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <FlatList
+          data={groups}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => (
+            <GroupCard title={item} onPress={() => handleOpenGroup(item)} />
+          )}
+          ListEmptyComponent={() => (
+            <EmptyList message="Que tal cadastrar a primeira turma?" />
+          )}
+          contentContainerStyle={groups.length === 0 && { flex: 1 }} // Centraliza na tela caso groups esteja vazio
+        />
+      )}
 
       <Button title="Criar nova turma" onPress={handleNewGroup} />
     </Container>

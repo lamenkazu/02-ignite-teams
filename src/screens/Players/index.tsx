@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, FlatList, TextInput } from "react-native";
 
 import { addPlayerByGroup } from "@/storage/player/addPlayerByGroup";
-import { fetchPlayersByGroup } from "@/storage/player/fetchPlayersByGroup";
 import { fetchTeamPlayersByGroup } from "@/storage/player/fetchTeamPlayersByGroup";
 import { PlayerStorageDTO } from "@/storage/player/PlayerStorageDTO";
 import { removePlayerFromGroup } from "@/storage/player/removePlayerFromGroup";
@@ -20,12 +19,14 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
 import { AppError } from "@/utils/AppError";
+import { Loading } from "@/components/Loading";
 
 interface RouteParams {
   group: string;
 }
 
 export const Players = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [team, setTeam] = useState("Time A");
   const [players, setPlayers] = useState<PlayerStorageDTO[]>([]);
@@ -36,6 +37,20 @@ export const Players = () => {
   const { group } = route.params as RouteParams;
 
   const newPlayerNameInputRef = useRef<TextInput>(null);
+
+  const fetchTeamPlayers = async () => {
+    try {
+      setIsLoading(true);
+
+      const teamPlayers = await fetchTeamPlayersByGroup(group, team);
+      setPlayers(teamPlayers);
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Não foi possível carregar as pessoas do time.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAddNewPlayer = async () => {
     if (newPlayerName.trim() === "") {
@@ -53,6 +68,7 @@ export const Players = () => {
     try {
       await addPlayerByGroup(newPlayer, group);
       setNewPlayerName("");
+      fetchTeamPlayers();
 
       newPlayerNameInputRef.current?.blur();
     } catch (error) {
@@ -67,6 +83,8 @@ export const Players = () => {
   const handleRemovePlayer = async (playerName: string) => {
     try {
       await removePlayerFromGroup(playerName, group);
+
+      fetchTeamPlayers();
     } catch (error) {
       console.log(error);
       Alert.alert("Remover Pessoa", "Não foi possível remover a pessoa.");
@@ -91,18 +109,8 @@ export const Players = () => {
   };
 
   useEffect(() => {
-    const fetchTeamPlayers = async () => {
-      try {
-        const teamPlayers = await fetchTeamPlayersByGroup(group, team);
-        setPlayers(teamPlayers);
-      } catch (error) {
-        console.log(error);
-        Alert.alert("Erro", "Não foi possível carregar as pessoas do time.");
-      }
-    };
-
     fetchTeamPlayers();
-  }, [team, players]);
+  }, [team]);
 
   return (
     <Container>
@@ -141,24 +149,28 @@ export const Players = () => {
         <NumbersOfPlayers>{players.length}</NumbersOfPlayers>
       </HeaderList>
 
-      <FlatList
-        data={players}
-        keyExtractor={(item) => item.name}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <PlayerCard
-            name={item.name}
-            onRemove={() => handleRemovePlayer(item.name)}
-          />
-        )}
-        ListEmptyComponent={() => (
-          <EmptyList message="Não há pessoas nesse time." />
-        )}
-        contentContainerStyle={[
-          { paddingBottom: 100 },
-          players.length === 0 && { flex: 1 }, // Centraliza na tela caso players esteja vazio
-        ]}
-      />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <FlatList
+          data={players}
+          keyExtractor={(item) => item.name}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <PlayerCard
+              name={item.name}
+              onRemove={() => handleRemovePlayer(item.name)}
+            />
+          )}
+          ListEmptyComponent={() => (
+            <EmptyList message="Não há pessoas nesse time." />
+          )}
+          contentContainerStyle={[
+            { paddingBottom: 100 },
+            players.length === 0 && { flex: 1 }, // Centraliza na tela caso players esteja vazio
+          ]}
+        />
+      )}
 
       <Button
         title="Remover Turma"
