@@ -1,23 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, FlatList, TextInput } from "react-native";
 
-import { ButtonIcon } from "@/components/ButtonIcon";
-import { Filter } from "@/components/Filter";
-import { Header } from "@/components/Header";
-import { Highlight } from "@/components/Highlight";
-import { Input } from "@/components/Input";
-
-import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
-import { PlayerCard } from "@/components/PlayerCard";
-import { EmptyList } from "@/components/EmptyList";
-import { Button } from "@/components/Button";
-import { useRoute } from "@react-navigation/native";
-import { AppError } from "@/utils/AppError";
 import { addPlayerByGroup } from "@/storage/player/addPlayerByGroup";
 import { fetchPlayersByGroup } from "@/storage/player/fetchPlayersByGroup";
 import { fetchTeamPlayersByGroup } from "@/storage/player/fetchTeamPlayersByGroup";
 import { PlayerStorageDTO } from "@/storage/player/PlayerStorageDTO";
 import { removePlayerFromGroup } from "@/storage/player/removePlayerFromGroup";
+import { removeGroupByName } from "@/storage/group/removeGroupByName";
+
+import { ButtonIcon } from "@/components/ButtonIcon";
+import { Filter } from "@/components/Filter";
+import { Header } from "@/components/Header";
+import { Highlight } from "@/components/Highlight";
+import { Input } from "@/components/Input";
+import { PlayerCard } from "@/components/PlayerCard";
+import { EmptyList } from "@/components/EmptyList";
+import { Button } from "@/components/Button";
+import { useNavigation, useRoute } from "@react-navigation/native";
+
+import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
+import { AppError } from "@/utils/AppError";
 
 interface RouteParams {
   group: string;
@@ -27,6 +29,8 @@ export const Players = () => {
   const [newPlayerName, setNewPlayerName] = useState("");
   const [team, setTeam] = useState("Time A");
   const [players, setPlayers] = useState<PlayerStorageDTO[]>([]);
+
+  const { navigate } = useNavigation();
 
   const route = useRoute();
   const { group } = route.params as RouteParams;
@@ -67,6 +71,23 @@ export const Players = () => {
       console.log(error);
       Alert.alert("Remover Pessoa", "Não foi possível remover a pessoa.");
     }
+  };
+
+  const removeGroup = async () => {
+    try {
+      await removeGroupByName(group);
+      navigate("groups");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Remover Grupo", "Não foi possível remover o grupo.");
+    }
+  };
+
+  const handleRemoveGroup = async () => {
+    Alert.alert("Remover", "Deseja remover o grupo?", [
+      { text: "Não", style: "cancel" },
+      { text: "Sim", onPress: () => removeGroup() },
+    ]);
   };
 
   useEffect(() => {
@@ -139,7 +160,11 @@ export const Players = () => {
         ]}
       />
 
-      <Button title="Remover Turma" variant="secondary" />
+      <Button
+        title="Remover Turma"
+        variant="secondary"
+        onPress={handleRemoveGroup}
+      />
     </Container>
   );
 };
