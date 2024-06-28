@@ -45,6 +45,7 @@ export const Players = () => {
 
     try {
       await addPlayerByGroup(newPlayer, group);
+      setNewPlayerName("");
     } catch (error) {
       if (error instanceof AppError) {
         return Alert.alert("Nova Pessoa", error.message);
@@ -77,6 +78,7 @@ export const Players = () => {
       <Form>
         <Input
           placeholder="Nome da pessoa"
+          value={newPlayerName}
           autoCorrect={false} // remove o auto correct do teclado
           onChangeText={setNewPlayerName}
         />
