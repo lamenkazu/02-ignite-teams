@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Alert, FlatList } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Alert, FlatList, TextInput } from "react-native";
 
 import { ButtonIcon } from "@/components/ButtonIcon";
 import { Filter } from "@/components/Filter";
@@ -30,6 +30,8 @@ export const Players = () => {
   const route = useRoute();
   const { group } = route.params as RouteParams;
 
+  const newPlayerNameInputRef = useRef<TextInput>(null);
+
   const handleAddNewPlayer = async () => {
     if (newPlayerName.trim() === "") {
       return Alert.alert(
@@ -46,6 +48,8 @@ export const Players = () => {
     try {
       await addPlayerByGroup(newPlayer, group);
       setNewPlayerName("");
+
+      newPlayerNameInputRef.current?.blur();
     } catch (error) {
       if (error instanceof AppError) {
         return Alert.alert("Nova Pessoa", error.message);
@@ -55,17 +59,17 @@ export const Players = () => {
     }
   };
 
-  const fetchTeamPlayers = async () => {
-    try {
-      const teamPlayers = await fetchTeamPlayersByGroup(group, team);
-      setPlayers(teamPlayers);
-    } catch (error) {
-      console.log(error);
-      Alert.alert("Erro", "Não foi possível carregar as pessoas do time.");
-    }
-  };
-
   useEffect(() => {
+    const fetchTeamPlayers = async () => {
+      try {
+        const teamPlayers = await fetchTeamPlayersByGroup(group, team);
+        setPlayers(teamPlayers);
+      } catch (error) {
+        console.log(error);
+        Alert.alert("Erro", "Não foi possível carregar as pessoas do time.");
+      }
+    };
+
     fetchTeamPlayers();
   }, [team, players]);
 
@@ -77,6 +81,7 @@ export const Players = () => {
 
       <Form>
         <Input
+          inputRef={newPlayerNameInputRef}
           placeholder="Nome da pessoa"
           value={newPlayerName}
           autoCorrect={false} // remove o auto correct do teclado
