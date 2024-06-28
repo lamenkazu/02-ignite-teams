@@ -21,18 +21,22 @@ export const Groups = () => {
     navigate("new");
   };
 
-  const getAllGroups = async () => {
-    try {
-      const data = await fetchGroups();
-
-      setGroups(data);
-    } catch (error) {
-      console.log(error);
-    }
+  const handleOpenGroup = (group: string) => {
+    navigate("players", { group });
   };
 
   useFocusEffect(
     useCallback(() => {
+      const getAllGroups = async () => {
+        try {
+          const data = await fetchGroups();
+
+          setGroups(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
       getAllGroups();
     }, [])
   );
@@ -45,7 +49,9 @@ export const Groups = () => {
       <FlatList
         data={groups}
         keyExtractor={(item) => item}
-        renderItem={({ item }) => <GroupCard title={item} />}
+        renderItem={({ item }) => (
+          <GroupCard title={item} onPress={() => handleOpenGroup(item)} />
+        )}
         ListEmptyComponent={() => (
           <EmptyList message="Que tal cadastrar a primeira turma?" />
         )}
